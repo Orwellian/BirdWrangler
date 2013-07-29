@@ -25,6 +25,7 @@
     <string name="activityPrompt">Select the observed activity</string>
     <string name="refreshLocation">Refresh Loc</string>
     
+    
 
     <string-array name="birdActivities">
         <item>@string/nesting</item>
