@@ -1,0 +1,101 @@
+package com.catalyst.birdwrangler.activities;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.graphics.Bitmap;
+
+import com.catalyst.birdwrangler.R;
+import com.catalyst.birdwrangler.utilities.CustomAdapter;
+import com.catalyst.birdwrangler.utilities.GPSTracker;
+import com.catalyst.birdwrangler.utilities.Utilities;
+
+public class SubmissionActivity extends Activity {
+
+	CustomAdapter adapterForSpinner;
+	TextView currentDate, latLabel, longLabel;
+	Utilities utils;
+	final static int CAMERA_RESULT = 0;
+	ImageView imv;
+	GPSTracker tracker;
+	Location location;
+	long date;
+	double latitude, longitude;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_submission);
+		currentDate = (TextView) findViewById(R.id.currentDate);
+		currentDate.setText(displayCurrentDate());
+		latLabel = (TextView) findViewById(R.id.textView1);
+		longLabel = (TextView) findViewById(R.id.textView2);
+		getLatAndLong();
+		String[] array = getResources().getStringArray(R.array.birdActivities);
+		adapterForSpinner = new CustomAdapter(this, R.id.birdActivity, array);
+		Spinner birdActivity = (Spinner) findViewById(R.id.birdActivity);
+		birdActivity.setAdapter(adapterForSpinner);
+		birdActivity.setSelection(adapterForSpinner.getCount());
+
+	}
+
+	private String displayCurrentDate() {
+		utils = new Utilities();
+		date = utils.currentMillis();
+		String theDate = utils.formatMillis(date);
+
+		return theDate;
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.submission, menu);
+		return true;
+	}
+	
+	public void openCamera(View v){
+		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		startActivityForResult(i, CAMERA_RESULT);
+	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		
+		if(resultCode == RESULT_OK){
+			Bundle extras = intent.getExtras();
+			Bitmap bmp = (Bitmap) extras.get("data");
+			
+			imv = (ImageView) findViewById(R.id.imageView1);
+			imv.setImageBitmap(bmp);
+			imv.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		getLatAndLong();
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast.makeText(context, "The Location has been refreshed.", duration).show();
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void getLatAndLong() {
+		tracker = new GPSTracker(this);
+		location = tracker.getLocation();
+		latLabel.setText("Latitude: " + String.valueOf(tracker.getLat(location)));
+		longLabel.setText("Longitude: " + String.valueOf(tracker.getLong(location)));
+		
+	}
+
+}

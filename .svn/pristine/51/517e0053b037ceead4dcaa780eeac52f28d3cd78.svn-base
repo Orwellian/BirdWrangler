@@ -1,0 +1,176 @@
+package com.catalyst.birdwrangler.activities;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.catalyst.birdwrangler.R;
+import com.catalyst.birdwrangler.database.DatabaseHandler;
+import com.catalyst.birdwrangler.entities.Bird;
+import com.catalyst.birdwrangler.entities.Record;
+import com.catalyst.birdwrangler.utilities.CustomAdapter;
+import com.catalyst.birdwrangler.utilities.GPSTracker;
+import com.catalyst.birdwrangler.utilities.Utilities;
+
+public class SubmissionActivity extends Activity {
+
+	CustomAdapter adapterForSpinner;
+	TextView currentDate, latLabel, longLabel;
+	EditText birdName, birdNotes;
+	Spinner birdActivity;
+	Utilities utils;
+	final static int CAMERA_RESULT = 0;
+	ImageView imv;
+	Uri uri;
+	Bitmap bmp;
+	String uriStr = "";
+	GPSTracker tracker;
+	Location location;
+	long date;
+	double latitude, longitude;
+	int duration = Toast.LENGTH_SHORT;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_submission);
+		
+		birdActivity = (Spinner) findViewById(R.id.birdActivity);
+		birdName = (EditText) findViewById(R.id.nameInput);
+		birdNotes = (EditText) findViewById(R.id.birdNotes);
+		currentDate = (TextView) findViewById(R.id.currentDate);
+		latLabel = (TextView) findViewById(R.id.textView1);
+		longLabel = (TextView) findViewById(R.id.textView2);
+		imv = (ImageView) findViewById(R.id.imageView1);
+		
+		currentDate.setText(displayCurrentDate());
+		getLatAndLong();
+		
+		String[] array = getResources().getStringArray(R.array.birdActivities);
+		adapterForSpinner = new CustomAdapter(this, R.id.birdActivity, array);
+		birdActivity.setAdapter(adapterForSpinner);
+		birdActivity.setSelection(adapterForSpinner.getCount());
+		
+	}
+
+	private String displayCurrentDate() {
+		utils = new Utilities();
+		date = utils.currentMillis();
+		String theDate = utils.formatMillis(date);
+
+		return theDate;
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.submission, menu);
+		return true;
+	}
+
+	public void submitObservation(View v) {
+		int errors = 0;
+		String bName = birdName.getText().toString();
+
+		if (bName.length() == 0) {
+			birdName.setError("Bird Name is Required!");
+			errors++;
+		}
+
+		String bActivity = birdActivity.getSelectedItem().toString();
+		if (bActivity.equals("Activity")) {
+			errors++;
+			setErrorOnSpinner(birdActivity);
+		}
+		if (errors == 0) {
+			int birdId = DatabaseHandler.getInstance(this).getBirdIdByBirdName(
+					bName);
+			if (birdId == 0) {
+				Bird bird = new Bird();
+				bird.setBirdNameCommon(bName);
+				boolean isWriteSuccessful = DatabaseHandler.getInstance(this).addBird(bird);
+				if(isWriteSuccessful){
+					birdId = DatabaseHandler.getInstance(this).getBirdIdByBirdName(
+							bName);
+				} else {
+					Toast.makeText(this, "An error occurred writing to the database.", duration).show();
+				}
+			}
+			Record observation = new Record();
+			observation.setRecordDate(date);
+			observation.setRecordLat(latitude);
+			observation.setRecordLong(longitude);
+			observation.setPhotoUri(uriStr);
+			observation.setRecordBehavior(bActivity);
+			observation.setRecordNotes(birdNotes.getText().toString());
+			observation.setBirdId(birdId);
+
+			DatabaseHandler.getInstance(this).addRecord(observation);
+			Toast.makeText(this, "Your bird has been saved to the database.", duration).show();
+			finish();
+		}
+	}
+
+	public void openCamera(View v) {
+		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		startActivityForResult(i, CAMERA_RESULT);
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+
+		if (resultCode == RESULT_OK) {
+			imv.setVisibility(View.VISIBLE);
+			Bundle extras = intent.getExtras();
+			bmp = (Bitmap) extras.get("data");
+			imv.setImageBitmap(bmp);
+			// Uri uri = intent.getData();
+			// imv.setImageURI(uri);
+			uriStr = intent.getDataString();
+			Toast.makeText(getApplicationContext(), uriStr, duration).show();
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		getLatAndLong();
+		Context context = getApplicationContext();
+		Toast.makeText(context, "The Location has been refreshed.", duration)
+				.show();
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void getLatAndLong() {
+//		tracker = new GPSTracker(this);
+//		location = tracker.getLocation();
+//		latLabel.setText("Latitude: "
+//				+ String.valueOf(tracker.getLat(location)));
+//		longLabel.setText("Longitude: "
+//				+ String.valueOf(tracker.getLong(location)));
+		latitude = 45.343434;
+		longitude = -122.2342342;
+		latLabel.setText("Latitude: " + latitude);
+		longLabel.setText("Longitude: " + longitude);
+	}
+
+	/**
+	 * Sets an error on the activity spinner, if no option is selected.
+	 */
+	public void setErrorOnSpinner(Spinner selectedSpinner) {
+		selectedSpinner.requestFocus();
+		adapterForSpinner.setError(selectedSpinner, "An Activity is Required!");
+	}
+
+}

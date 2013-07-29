@@ -1,0 +1,5 @@
+package com.catalyst.birdwrangler.database;
+
+public class DatabaseHandler {
+
+}

@@ -1,0 +1,48 @@
+package com.catalyst.birdwrangler.entities;
+
+public class Bird {
+
+	int birdId;
+	String birdNameCommon;
+	String birdNameLatin;
+	
+	public Bird(){
+		
+	}
+	
+	public Bird(int birdId, String birdNameCommon, String birdNameLatin){
+		this.birdId = birdId;
+		this.birdNameCommon = birdNameCommon;
+		this.birdNameLatin = birdNameLatin;
+	}
+	
+	public Bird(String birdNameCommon, String birdNameLatin){
+		this.birdNameCommon = birdNameCommon;
+		this.birdNameLatin = birdNameLatin;
+	}
+
+	public int getBirdId() {
+		return birdId;
+	}
+
+	public void setBirdId(int birdId) {
+		this.birdId = birdId;
+	}
+
+	public String getBirdNameCommon() {
+		return birdNameCommon;
+	}
+
+	public void setBirdNameCommon(String birdNameCommon) {
+		this.birdNameCommon = birdNameCommon;
+	}
+
+	public String getBirdNameLatin() {
+		return birdNameLatin;
+	}
+
+	public void setBirdNameLatin(String birdNameLatin) {
+		this.birdNameLatin = birdNameLatin;
+	}
+	
+}

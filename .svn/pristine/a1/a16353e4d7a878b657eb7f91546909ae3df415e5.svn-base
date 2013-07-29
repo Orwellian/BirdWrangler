@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BirdWrangler</string>
+    <string name="action_settings">Settings</string>
+    <string name="todays_date">Current Date</string>
+    <string name="submit">Submit Observation</string>
+    <string name="records">Review Records</string>
+    <string name="spotted_owl">Spotted Owl</string>
+    <string name="birdPhoto">Bird Photo</string>
+    <string name="nameLabel">Common Name</string>
+    <string name="latinLabel">Latin Name</string>
+    <string name="activityLabel">Activity</string>
+    <string name="latLabel">Latitude:</string>
+    <string name="longLabel">Longitude:</string>
+    <string name="notes">Notes:</string>
+    <string name="submitRecord">Submit</string>
+    <string name="title_activity_submission">Submit Observation</string>
+    <string name="title_activity_records">Review Records</string>
+    <string name="nesting">Nesting</string>
+    <string name="feeding">Feeding</string>
+    <string name="mating">Mating</string>
+    <string name="roosting">Roosting</string>
+    <string name="flying">Flying</string>
+    <string name="activityPrompt">Select the observed activity</string>
+    <string name="refreshLocation">Refresh Loc</string>
+
+    <string-array name="birdActivities">
+        <item>@string/nesting</item>
+        <item>@string/feeding</item>
+        <item>@string/mating</item>
+        <item>@string/roosting</item>
+        <item>@string/flying</item>
+        <item>@string/activityLabel</item>
+    </string-array>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
